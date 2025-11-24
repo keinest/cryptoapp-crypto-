@@ -1,7 +1,7 @@
 SRC_DIR = crypto
 BIN_DIR = bin
 
-MAIN_CLASS = Main
+MAIN_CLASS = crypto.Main
 
 JAVAC = javac
 JAVA = java
