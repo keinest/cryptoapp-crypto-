@@ -10,7 +10,7 @@ import crypto.users.User;
 
 public class dbmanagement 
 {
-    private static final String DB_URL = "jdbc:mysql://localhost:5432/crypto_app";
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/crypto_app";
 
     public static Connection connect() 
     {
@@ -40,13 +40,22 @@ public class dbmanagement
                 + "password VARCHAR(255) NOT NULL"
                 + ");";
 
-        try(Connection conn = connect();PreparedStatement pstmt = conn.prepareStatement(sql)) 
-        {
-            if(pstmt != null)
-                pstmt.execute();
+        try(Connection conn = connect()) {
+        
+        if (conn != null) 
+        { 
+            try(PreparedStatement pstmt = conn.prepareStatement(sql)) 
+            {
+                if(pstmt != null)
+                    pstmt.execute();
+            }
         } 
-
-        catch(SQLException e) {System.err.println("Erreur lors de la création de la table : " + e.getMessage());}
+        else
+            System.err.println("La création de la table a échoué car la connexion est nulle.");
+    } 
+    catch(SQLException e) {
+        System.err.println("Erreur lors de la création de la table : " + e.getMessage());
+    }
     }
 
     public static boolean registerUser(User user) 
