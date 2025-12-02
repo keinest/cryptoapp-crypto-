@@ -147,6 +147,8 @@ public class Main extends JFrame
         Header header = new Header(this);
         header.removeBackBtn();
         header.removeLogOutBtn();
+        header.removeAnalystBtn();
+        
         header.setBackground(PRIMARY_COLOR);
         datas_panel.setBackground(PRIMARY_COLOR);
         datas_panel.add(header, BorderLayout.WEST);
