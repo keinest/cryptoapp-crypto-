@@ -2,6 +2,9 @@ package crypto;
 
 import crypto.Main;
 import crypto.users.Registration;
+import crypto.crypt_analys_brute_force.rsa_brute_force.RSABruterForce;
+import crypto.crypt_analys_brute_force.affine_brute_force.AffineBruterForce;
+import crypto.crypt_analys_brute_force.cesar_brute_force.CesarBruterForce;
 import crypto.users.Connect;
 
 import javax.swing.*;
@@ -18,6 +21,7 @@ public class Header extends JPanel
     protected JButton connect;
     protected JButton signOut;
     protected JButton back;
+    protected JButton cryptanalys;
     private Main window;
 
     public Header(Main window)
@@ -32,10 +36,11 @@ public class Header extends JPanel
         ));
         this.setLayout(new FlowLayout(FlowLayout.RIGHT, 15, 5));
 
-        this.sigin   = createHeaderButton("Sigin", ACCENT_COLOR);
-        this.connect = createHeaderButton("Login", new Color(46, 139, 87));
-        this.signOut = createHeaderButton("Log Out", Color.GRAY);
-        this.back    = createHeaderButton("Back", PRIMARY_COLOR);
+        this.sigin       = createHeaderButton("Sigin", ACCENT_COLOR);
+        this.connect     = createHeaderButton("Login", new Color(46, 139, 87));
+        this.signOut     = createHeaderButton("Log Out", Color.GRAY);
+        this.back        = createHeaderButton("Back", PRIMARY_COLOR);
+        this.cryptanalys = createHeaderButton("Crypt-analys", PRIMARY_COLOR);
 
         this.back.addActionListener(new ActionListener()
         {
@@ -72,6 +77,16 @@ public class Header extends JPanel
             }
         });
 
+        this.cryptanalys.addActionListener(e -> 
+        {
+            JPanel cryptPanel = new CesarBruterForce(Header.this.window);
+            Header.this.window.getContentPane().removeAll();
+            Header.this.window.setContentPane(cryptPanel);
+            Header.this.window.revalidate();
+            Header.this.window.repaint();
+        });
+
+        this.add(this.cryptanalys);
         this.add(this.sigin);
         this.add(this.connect);
         this.add(this.signOut);
@@ -118,4 +133,11 @@ public class Header extends JPanel
         this.revalidate();
         this.repaint();
     }
+
+    public void removeAnalystBtn()
+    {
+        this.remove(this.cryptanalys);
+        this.revalidate();
+        this.repaint();
+    } 
 }
