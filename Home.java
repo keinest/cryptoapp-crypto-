@@ -1,17 +1,19 @@
 package crypto;
-import crypto.rsa.RsaEncrypt;
-import crypto.affine.Affine;
+
+import crypto.encryption_decryption.rsa.RSA;
+import crypto.encryption_decryption.cesar.Cesar;
+import crypto.encryption_decryption.vigenere.Vigenere;
+import crypto.encryption_decryption.vernam.Vernam;
+import crypto.encryption_decryption.hill.Hill;
+import crypto.encryption_decryption.feistel.Feistel;
+//import crypto.encryption_decryption.rsa.RsaEncrypt;
+import crypto.encryption_decryption.affine.Affine;
+
 import crypto.users.Registration;
 import crypto.users.Connect;
 import crypto.utils.DrawBackground;
-import crypto.rsa.RSA;
-import crypto.cesar.Cesar;
-import crypto.vigenere.Vigenere;
-import crypto.vernam.Vernam;
 import crypto.Main;
 import crypto.Header;
-import crypto.hill.Hill;
-import crypto.feistel.Feistel;
 
 import javax.swing.*;
 import java.awt.*;
