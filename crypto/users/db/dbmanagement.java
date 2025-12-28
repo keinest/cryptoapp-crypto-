@@ -5,14 +5,67 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import crypto.users.User;
 
 public class dbmanagement
 {
-    private static final String DB_URL      = "jdbc:mysql://localhost:3306/crypto_app";
-    private static final String DB_USER     = "crypto_user";
-    private static final String DB_PASSWORD = "db_User123";
+    private static String DB_URL;
+    private static String DB_USER;
+    private static String DB_PASSWORD;
+    
+    static {
+        loadConfig();
+    }
+    
+    private static void loadConfig() 
+    {
+        Properties props = new Properties();
+        try 
+        {
+            FileInputStream input = null;
+            
+            try {input = new FileInputStream("config.properties");} 
+            catch (IOException e) 
+            {
+                try{input = new FileInputStream("crypto/config.properties");} 
+                catch (IOException e2) 
+                {
+                    System.err.println("⚠️  Fichier config.properties non trouve. Utilisation des valeurs par defaut.");
+                    setDefaultConfig();
+                    return;
+                }
+            }
+            
+            props.load(input);
+            input.close();
+            
+            DB_URL      = props.getProperty("db.url", "jdbc:mysql://localhost:3306/crypto_app");
+            DB_USER     = props.getProperty("db.username", "crypto_user");
+            DB_PASSWORD = props.getProperty("db.password", "db_User123");
+            
+            System.out.println("✅ Configuration chargee depuis config.properties");
+            
+        } 
+        catch (IOException e) 
+        {
+            System.err.println("❌ Erreur lors du chargement de config.properties: " + e.getMessage());
+            setDefaultConfig();
+        }
+    }
+    
+    private static void setDefaultConfig() 
+    {
+        DB_URL      = "jdbc:mysql://localhost:3306/crypto_app";
+        DB_USER     = "crypto_user";
+        DB_PASSWORD = "db_User123";
+        System.out.println("Utilisation des valeurs par defaut:");
+        System.out.println("  URL: " + DB_URL);
+        System.out.println("  User: " + DB_USER);
+    }
 
     public static Connection connect() 
     {
@@ -148,22 +201,22 @@ public class dbmanagement
     public static User getUserByEmail(String hashedEmail) 
     {
         String query = "SELECT login, email, password FROM users WHERE email = ?";
-        try(Connection conn = connect(); 
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-
+        try(Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement(query)) 
+        {
             pstmt.setString(1, hashedEmail);
             ResultSet rs = pstmt.executeQuery();
 
-            if(rs.next()) {
+            if(rs.next()) 
+            {
                 String login = rs.getString("login");
                 String email = rs.getString("email");
                 String password = rs.getString("password");
 
                 return new User(login, email, password);
             }
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
+        } 
+        catch(SQLException e){e.printStackTrace();}
+        
         return null;
     }
 }
