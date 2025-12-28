@@ -4,6 +4,7 @@ import crypto.utils.DrawBackground;
 import crypto.Main;
 import crypto.Header;
 import crypto.Home;
+import crypto.utils.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,9 +39,9 @@ public class Feistel extends JPanel
         DrawBackground background = new DrawBackground("crypto/ressources/IMG-20251026-WA0102.jpg");
         background.setLayout(new BorderLayout());
 
-        this.encrypt = Main.createStyledButton("Encrypt", PRIMARY_BUTTON_COLOR, Color.WHITE, new Font("SansSerif", Font.BOLD, 22));
-        this.decrypt = Main.createStyledButton("Decrypt", PRIMARY_BUTTON_COLOR, Color.WHITE, new Font("SansSerif", Font.BOLD, 22));
-        this.back    = Main.createStyledButton("Back", BACK_BUTTON_COLOR, Color.WHITE, new Font("SansSerif", Font.BOLD, 22));
+        this.encrypt = Main.createCyberButton("Encrypt", ThemeManager.BUTTON_BG);
+        this.decrypt = Main.createCyberButton("Decrypt", ThemeManager.BUTTON_BG);
+        this.back    = Main.createCyberButton("Back", ThemeManager.BUTTON_BG);
 
         MouseAdapter actionButtonHover = new MouseAdapter()
         {
