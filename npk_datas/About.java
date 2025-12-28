@@ -1,12 +1,14 @@
 package crypto.npk_datas;
 
 import crypto.Main;
-import crypto.utils.DrawBackground;
 import crypto.users.Connect; 
-import crypto.users.Registration; 
+import crypto.users.Registration;
+import crypto.utils.DrawBackground; 
+import crypto.utils.AnimatedBubble;
+import crypto.utils.ThemeManager;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 import java.awt.event.*;
 import javax.swing.border.*;
 
@@ -21,7 +23,7 @@ public class About extends JPanel
     private static final Font SUBTITLE_FONT  = new Font("SansSerif", Font.BOLD, 20);
     private static final Font BODY_FONT      = new Font("SansSerif", Font.PLAIN, 15);
     
-    protected DrawBackground background;
+    protected AnimatedBubble background;
     protected JButton back;
     protected Main main_window;
     
@@ -31,7 +33,7 @@ public class About extends JPanel
 
         this.setLayout(new BorderLayout());
 
-        this.background = new DrawBackground("crypto/ressources/IMG-20251023-WA0023.jpg");
+        this.background = new AnimatedBubble(ThemeManager.ACCENT_CYAN);
         
         this.back = createStyledButton("Back", Color.RED.darker());
 
@@ -128,7 +130,7 @@ public class About extends JPanel
         intro_textT.setOpaque(false);
         intro_textT.setLineWrap(true);
         intro_textT.setWrapStyleWord(true);
-        intro_textT.setForeground(TEXT_DARK);
+        intro_textT.setForeground(Color.WHITE);
 
         //--------------------------------------------------------------------------------------------
 
@@ -151,7 +153,7 @@ public class About extends JPanel
         archit.setEditable(false);
         archit.setFont(BODY_FONT);
         archit.setOpaque(false);
-        archit.setForeground(TEXT_DARK);
+        archit.setForeground(Color.WHITE);
        
         JLabel secu_prin = new JLabel("🛡️ Cyber-sécurité à l'épreuve des balles (et des hackers)!");
         secu_prin.setFont(TITLE_FONT);
@@ -166,7 +168,7 @@ public class About extends JPanel
         secu_des.setEditable(false);
         secu_des.setOpaque(false);
         secu_des.setFont(BODY_FONT);
-        secu_des.setForeground(TEXT_DARK);
+        secu_des.setForeground(Color.WHITE);
 
         JLabel web_title = new JLabel("🌐️ Votre Présence En Ligne, Notre Spécialité !");
         web_title.setFont(TITLE_FONT);
@@ -182,7 +184,7 @@ public class About extends JPanel
         web.setEditable(false);
         web.setOpaque(false);
         web.setFont(BODY_FONT);
-        web.setForeground(TEXT_DARK);
+        web.setForeground(Color.WHITE);
 
         JLabel app_title = new JLabel("📱️💻️ Applications Mobiles & Bureau : Vos Idées Prennent Vie !");
         app_title.setFont(TITLE_FONT);
@@ -197,7 +199,7 @@ public class About extends JPanel
         app.setEditable(false);
         app.setOpaque(false);
         app.setFont(BODY_FONT);
-        app.setForeground(TEXT_DARK);
+        app.setForeground(Color.WHITE);
 
         JLabel tech_title = new JLabel("🌃️ Nos Technologies : ");
         tech_title.setFont(TITLE_FONT);
@@ -214,7 +216,7 @@ public class About extends JPanel
         tech.setEditable(false);
         tech.setOpaque(false);
         tech.setFont(new Font("Monospaced", Font.PLAIN, 15));
-        tech.setForeground(TEXT_DARK);
+        tech.setForeground(Color.WHITE);
 
         JLabel train_title = new JLabel("👨‍🎓️ Devenez un As de la Tech !");
         train_title.setFont(TITLE_FONT);
@@ -229,7 +231,7 @@ public class About extends JPanel
         training.setEditable(false);
         training.setOpaque(false);
         training.setFont(BODY_FONT);
-        training.setForeground(TEXT_DARK);
+        training.setForeground(Color.WHITE);
 
         JLabel contact_title = new JLabel("🤝️ Contactez-nous dès aujourd'hui !");
         contact_title.setFont(TITLE_FONT);
@@ -244,7 +246,7 @@ public class About extends JPanel
         contact.setEditable(false);
         contact.setOpaque(false);
         contact.setFont(BODY_FONT);
-        contact.setForeground(TEXT_DARK);
+        contact.setForeground(Color.WHITE);
 
 
         JPanel describe_panel = new JPanel();
@@ -253,7 +255,7 @@ public class About extends JPanel
             describe_border
         ));
         describe_panel.setLayout(new BoxLayout(describe_panel,BoxLayout.Y_AXIS));
-        describe_panel.setOpaque(true);
+        describe_panel.setOpaque(false);
         describe_panel.setBackground(new Color(255,255,255,240));
 
         describe_panel.add(title_label);
