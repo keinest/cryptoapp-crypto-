@@ -1,22 +1,18 @@
 package crypto;
 
 import crypto.Main;
-import crypto.users.Registration;
-import crypto.crypt_analys_brute_force.rsa_brute_force.RSABruterForce;
-import crypto.crypt_analys_brute_force.affine_brute_force.AffineBruterForce;
-import crypto.crypt_analys_brute_force.cesar_brute_force.CesarBruterForce;
 import crypto.users.Connect;
+import crypto.users.Registration;
+import crypto.crypt_analyst_brute_force.CryptAnalyst;
+import crypto.session.UserSession;
+import crypto.utils.ThemeManager;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 import java.awt.event.*;
 
 public class Header extends JPanel
 {
-    private static final Color PRIMARY_COLOR = new Color(30, 40, 60);
-    private static final Color ACCENT_COLOR  = new Color(0, 150, 255);
-    private static final Color TEXT_LIGHT    = Color.WHITE;
-
     protected JButton sigin;
     protected JButton connect;
     protected JButton signOut;
@@ -28,19 +24,18 @@ public class Header extends JPanel
     {
         this.window = window;
         
-        this.setOpaque(true);
-        this.setBackground(new Color(240, 240, 240, 200)); 
+        this.setOpaque(false);
         this.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(10, 15, 10, 15),
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1)
+            BorderFactory.createLineBorder(ThemeManager.ACCENT_CYAN, 1)
         ));
         this.setLayout(new FlowLayout(FlowLayout.RIGHT, 15, 5));
 
-        this.sigin       = createHeaderButton("Sigin", ACCENT_COLOR);
-        this.connect     = createHeaderButton("Login", new Color(46, 139, 87));
-        this.signOut     = createHeaderButton("Log Out", Color.GRAY);
-        this.back        = createHeaderButton("Back", PRIMARY_COLOR);
-        this.cryptanalys = createHeaderButton("Crypt-analys", PRIMARY_COLOR);
+        this.sigin       = Main.createCyberButton("Signup", ThemeManager.ACCENT_PURPLE);
+        this.connect     = Main.createCyberButton("Login", ThemeManager.ACCENT_GREEN);
+        this.signOut     = Main.createCyberButton("Log Out", new Color(231, 76, 60));
+        this.back        = Main.createCyberButton("Back", ThemeManager.ACCENT_BLUE);
+        this.cryptanalys = Main.createCyberButton("Crypt-analysis", ThemeManager.ACCENT_CYAN);
 
         this.back.addActionListener(new ActionListener()
         {
@@ -49,6 +44,8 @@ public class Header extends JPanel
             {
                 Header.this.window.getContentPane().removeAll();
                 Header.this.window.showHome();
+                Header.this.window.revalidate();
+                Header.this.window.repaint();
             }
         });
 
@@ -79,45 +76,67 @@ public class Header extends JPanel
 
         this.cryptanalys.addActionListener(e -> 
         {
-            JPanel cryptPanel = new CesarBruterForce(Header.this.window);
+            UserSession session = UserSession.getInstance();
+            if(!session.isLoggedIn()) 
+            {
+                int choice = JOptionPane.showConfirmDialog(
+                    Header.this.window,
+                    "<html><div style='color:#ffff55;'>" +
+                    "Cryptanalysis is only available for logged in users.<br>" +
+                    "Would you like to login now?</div></html>",
+                    "Login Required",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                
+                if(choice == JOptionPane.YES_OPTION) 
+                {
+                    Header.this.window.getContentPane().removeAll();
+                    Header.this.window.setContentPane(new Connect(Header.this.window));
+                    Header.this.window.revalidate();
+                    Header.this.window.repaint();
+                }
+                return;
+            }
+            
             Header.this.window.getContentPane().removeAll();
-            Header.this.window.setContentPane(cryptPanel);
+            Header.this.window.setContentPane(new CryptAnalyst(Header.this.window));
             Header.this.window.revalidate();
             Header.this.window.repaint();
         });
 
-        this.add(this.cryptanalys);
+        this.signOut.addActionListener(e -> {
+            UserSession session = UserSession.getInstance();
+            if(session.isLoggedIn()) {
+                int confirm = JOptionPane.showConfirmDialog(
+                    window,
+                    "<html><div style='color:#ffff55;'>Are you sure you want to logout?</div></html>",
+                    "Confirmation",
+                    JOptionPane.YES_NO_OPTION
+                );
+                
+                if(confirm == JOptionPane.YES_OPTION) {
+                    session.destroySession();
+                    window.getContentPane().removeAll();
+                    window.showHome();
+                }
+            } else {
+                JOptionPane.showMessageDialog(
+                    window,
+                    "<html><div style='color:#ffff55;'>You are not logged in.</div></html>",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        });
+
         this.add(this.sigin);
         this.add(this.connect);
         this.add(this.signOut);
         this.add(this.back);
-    }
-
-    private JButton createHeaderButton(String text, Color background)
-    {
-        JButton button = new JButton(text);
-        button.setBackground(background);
-        button.setForeground(TEXT_LIGHT);
-        button.setFocusPainted(false);
-        button.setFont(new Font("SansSerif", Font.BOLD, 12));
-        button.setBorder(BorderFactory.createEmptyBorder(7, 12, 7, 12));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new MouseAdapter() 
-        {
-            @Override
-            public void mouseEntered(MouseEvent event) 
-            {
-                button.setBackground(background.brighter());
-            }
-
-            @Override
-            public void mouseExited(MouseEvent event) 
-            {
-                button.setBackground(background);
-            }
-        });
-        return button;
+        this.add(this.cryptanalys);
+        
+        updateButtonVisibility();
     }
 
     public void removeBackBtn()
@@ -139,5 +158,71 @@ public class Header extends JPanel
         this.remove(this.cryptanalys);
         this.revalidate();
         this.repaint();
-    } 
+    }
+    
+    public void removeSignupBtn()
+    {
+        this.remove(this.sigin);
+        this.revalidate();
+        this.repaint();
+    }
+    
+    public void removeLoginBtn()
+    {
+        this.remove(this.connect);
+        this.revalidate();
+        this.repaint();
+    }
+    
+    public JButton getCryptanalysButton()
+    {
+        return this.cryptanalys;
+    }
+    
+    public JButton getSignOutButton()
+    {
+        return this.signOut;
+    }
+    
+    public JButton getConnectButton()
+    {
+        return this.connect;
+    }
+    
+    public JButton getSignupButton()
+    {
+        return this.sigin;
+    }
+    
+    public void updateButtonVisibility()
+    {
+        UserSession session = UserSession.getInstance();
+        
+        if(session.isLoggedIn()) {
+            if(session.isGuest()) {
+                this.cryptanalys.setVisible(false);
+                this.signOut.setVisible(true);
+                this.sigin.setVisible(false);
+                this.connect.setVisible(false);
+            } else {
+                this.cryptanalys.setVisible(true);
+                this.signOut.setVisible(true);
+                this.sigin.setVisible(false);
+                this.connect.setVisible(false);
+            }
+        } else {
+            this.cryptanalys.setVisible(false);
+            this.signOut.setVisible(false);
+            this.sigin.setVisible(true);
+            this.connect.setVisible(true);
+        }
+        
+        this.revalidate();
+        this.repaint();
+    }
+    
+    public void refreshButtons()
+    {
+        updateButtonVisibility();
+    }
 }
