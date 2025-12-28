@@ -7,7 +7,7 @@
 
 Une application Java complète pour le chiffrement, déchiffrement et analyse cryptographique avec interface graphique intuitive.
 
-## 📋 Table des Matières
+## Table des Matières
 - [Fonctionnalités](#-fonctionnalités)
 - [Structure du Projet](#-structure-du-projet)
 - [Prérequis](#-prérequis)
@@ -21,9 +21,9 @@ Une application Java complète pour le chiffrement, déchiffrement et analyse cr
 - [Contribution](#-contribution)
 - [Licence](#-licence)
 
-## ✨ Fonctionnalités
+##  Fonctionnalités
 
-### 🔐 Chiffrement & Déchiffrement
+###  Chiffrement & Déchiffrement
 - **César** : Chiffrement par décalage
 - **Vigenère** : Chiffrement polyalphabétique
 - **RSA** : Cryptographie asymétrique
@@ -43,7 +43,7 @@ Une application Java complète pour le chiffrement, déchiffrement et analyse cr
 - Sessions persistantes
 - Hachage sécurisé des mots de passe
 
-### 💾 Base de Données
+###  Base de Données
 - Stockage sécurisé des données utilisateurs
 - Historique des opérations cryptographiques
 - Connexion MySQL avec gestion de pool
@@ -55,7 +55,8 @@ crypto/
 ├── EnhancedHeader.java # En-tête améliorée de l'interface
 ├── Header.java # En-tête standard
 ├── Home.java # Page d'accueil
-│
+├── config.properties
+|
 ├── crypt_analyst_brute_force/ # Analyse cryptographique
 │ ├── CryptAnalyst.java
 │ ├── affine_brute_force/
@@ -75,7 +76,6 @@ crypto/
 │
 ├── driver_sql/ # Connexion base de données
 │ ├── mysql-connector-j-8.0.33.jar
-│ └── jar_run
 │
 ├── npk_datas/ # Données et informations
 │ ├── About.java
@@ -114,50 +114,23 @@ crypto/
 - **Make** (optionnel, pour la compilation automatique)
 - **Git** (pour cloner le dépôt)
 
-## 🚀 Installation
+## Installation
 
 ### 1. Cloner le dépôt
 ```bash
-git clone https://github.com/votre-username/votre-repo.git
+git clone https://github.com/keinest/cryptoapp-crypto
 cd cryptoapp-crypto
+```
 
-2. Configurer la base de données
-
--- Créer la base de données
-CREATE DATABASE crypto_db;
-USE crypto_db;
-
--- Créer la table utilisateurs
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    email VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP
-);
-
--- Créer la table d'historique
-CREATE TABLE crypto_history (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT,
-    algorithm VARCHAR(50),
-    operation VARCHAR(20),
-    input_text TEXT,
-    output_text TEXT,
-    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-3. Configurer les paramètres de connexion
+##2. Configurer les paramètres de connexion
 
 Mofifiez le fichier crypto/config.properties :
-
+```bash
 db.url=jdbc:mysql://localhost:3306/crypto_db
 db.username = votre_utilisateur
 db.password = votre_mot_de_passe
-
-🏗️ Compilation & Exécution
+```
+🏗️Compilation & Exécution
 Méthode 1 : Avec Makefile (recommandé)
 
 # Compiler et exécuter
@@ -184,15 +157,6 @@ javac -d bin -sourcepath crypto -cp "crypto/driver_sql/mysql-connector-j-8.0.33.
 # Exécuter l'application
 java -cp "bin:crypto/driver_sql/mysql-connector-j-8.0.33.jar" crypto.Main
 
-Méthode 3 : Dans GitHub Codespaces
-bash
-
-# Installer les dépendances
-sudo apt-get update && sudo apt-get install -y xvfb
-
-# Lancer avec environnement graphique virtuel
-make run-gui
-
 🏛️ Architecture
 Modèle Vue Contrôleur (MVC)
 
@@ -218,7 +182,7 @@ Sécurité
 
     Protection contre les injections SQL
 
-🧮 Algorithmes Implémentés
+Algorithmes Implémentés
 Chiffrement par Substitution
 
     César : C = (P + k) mod 26
@@ -245,24 +209,11 @@ Chiffrement à Flux
 
 👤 Gestion des Utilisateurs
 Inscription
-java
-
-// Hachage sécurisé du mot de passe
-String salt = generateSalt();
-String hashedPassword = sha256(password + salt);
-
-// Stockage dans la base de données
-userStorage.saveUser(username, hashedPassword, salt, email);
 
 Connexion
 java
 
 // Vérification des identifiants
-User user = userStorage.authenticate(username, password);
-if (user != null) {
-    UserSession.createSession(user);
-    // Redirection vers l'interface principale
-}
 
 Profil Utilisateur
 
@@ -272,12 +223,10 @@ Profil Utilisateur
 
     Modification des préférences
 
-🛠️ Développement
+Développement
 Code Style
 
     Conventions de nommage Java standard
-
-    Documentation Javadoc complète
 
     Séparation claire des responsabilités
 
