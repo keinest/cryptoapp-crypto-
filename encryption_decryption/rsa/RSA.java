@@ -1,16 +1,18 @@
 package crypto.encryption_decryption.rsa;
-import crypto.utils.DrawBackground;
-import crypto.encryption_decryption.rsa.RsaEncrypt;
-import crypto.Header;
+
 import crypto.Home;
 import crypto.Main;
+import crypto.Header;
+import crypto.utils.ThemeManager;
+import crypto.utils.DrawBackground;
+import crypto.encryption_decryption.rsa.RsaEncrypt;
 
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
 import java.io.*;
-import javax.swing.border.*;
+import java.awt.*;
+import javax.swing.*;
 import javax.imageio.*;
+import java.awt.event.*;
+import javax.swing.border.*;
 
 public class RSA extends JPanel
 {
@@ -41,9 +43,9 @@ public class RSA extends JPanel
         background.setOpaque(true);
         background.setLayout(new BorderLayout());
         
-        this.encrypt = Main.createStyledButton("Encrypt", PRIMARY_BUTTON_COLOR, Color.WHITE, new Font("SansSerif", Font.BOLD, 22));
-        this.decrypt = Main.createStyledButton("Decrypt", PRIMARY_BUTTON_COLOR, Color.WHITE, new Font("SansSerif", Font.BOLD, 22));
-        this.back    = Main.createStyledButton("Back", BACK_BUTTON_COLOR, Color.WHITE, new Font("SansSerif", Font.BOLD, 22));
+        this.encrypt = Main.createCyberButton("Encrypt", ThemeManager.BUTTON_BG);
+        this.decrypt = Main.createCyberButton("Decrypt", ThemeManager.BUTTON_BG);
+        this.back    = Main.createCyberButton("Back", ThemeManager.BUTTON_BG);
 
         MouseAdapter actionButtonHover = new MouseAdapter()
         {
