@@ -1,10 +1,16 @@
 package crypto.utils;
 
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Clipboard;
+import java.awt.Toolkit;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class Util
 {
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+    
     public static boolean veri_number_format(String number)
     {
         int A = 0;
@@ -68,36 +74,36 @@ public class Util
     public static boolean isPrime(int a,int b)
     {
         if(pgcd(a,b) != 1) return false;
-
         return true;
     }
 
     public static int power(int a,int e)
     {
-        if(e == 0) return 1;
+        if (e < 0)
+            throw new IllegalArgumentException("Exponent must be non-negative.");
+        
+        if(e == 0)
+            return 1;
 
-        return power(a,e - 1);
+        long base = a;
+        int exponent = e;
+        long result = 1;
+
+        while(exponent > 0) 
+        {
+            if((exponent & 1) == 1) 
+                result = result * base;
+
+            base = base * base;
+            exponent >>= 1;
+        }
+
+        return (int) result;
     }
     
     public static boolean mailVeri(String email)
     {
-        if(email.length() < 10)
-            return false;
-        
-        for(int i = 0; i < email.length() - 10; i++)
-        {
-            if(email.charAt(i) == '@' || (email.charAt(i) >= 'A' && email.charAt(i) <= 'Z'))
-                return false;
-        }
-
-        if(email.charAt(email.length() - 10) == '@' && email.charAt(email.length() - 9) == 'g' && email.charAt(email.length() - 8)  == 'm' 
-            && email.charAt(email.length() - 7)  == 'a' && email.charAt(email.length() - 6)== 'i' && email.charAt(email.length() - 5) == 'l' 
-            && email.charAt(email.length() - 4) == '.' && email.charAt(email.length() - 3) == 'c' && email.charAt(email.length() - 2) == 'o' 
-            && email.charAt(email.length() - 1) == 'm'
-        )
-            return true;
-
-        return false;
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 
     public static List<Integer> convert_to_bin(String str)
@@ -128,5 +134,41 @@ public class Util
         }
 
         return str.toString();
+    }
+
+    public static void copyText(String text)
+    {
+        StringSelection selection = new StringSelection(text);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(selection, null);
+    }
+    
+    public static boolean isStrongPassword(String password) 
+    {
+        if(password.length() < 8) return false;
+        
+        boolean hasUpper   = false;
+        boolean hasLower   = false;
+        boolean hasDigit   = false;
+        boolean hasSpecial = false;
+        
+        for(char c : password.toCharArray()) 
+        {
+            if(Character.isUpperCase(c)) hasUpper = true;
+            else if(Character.isLowerCase(c)) hasLower = true;
+            else if(Character.isDigit(c)) hasDigit = true;
+            else if(!Character.isLetterOrDigit(c)) hasSpecial = true;
+        }
+        
+        return hasUpper && hasLower && hasDigit && hasSpecial;
+    }
+    
+    public static String formatDuration(long milliseconds) 
+    {
+        long seconds = milliseconds / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        
+        return String.format("%02d:%02d:%02d", hours, minutes % 60, seconds % 60);
     }
 }
