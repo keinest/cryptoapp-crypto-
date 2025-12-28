@@ -1,25 +1,28 @@
 package crypto.users;
-import crypto.utils.DrawBackground;
-import crypto.utils.Util;
-import crypto.users.db.dbmanagement;
+
 import crypto.Main;
+import crypto.utils.Util;
 import crypto.npk_datas.About;
+import crypto.users.db.HASHCode;
 import crypto.npk_datas.Service;
 import crypto.npk_datas.Contact;
+import crypto.utils.ThemeManager;
+import crypto.session.UserSession;
+import crypto.utils.DrawBackground;
+import crypto.users.db.dbmanagement;
+import crypto.session.SessionInterceptor;
+import crypto.crypt_analyst_brute_force.CryptAnalyst;
 
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
+import javax.swing.*;
 import java.awt.event.*;
+import javax.swing.border.*;
 
 public class Connect extends JPanel
 {
-    private static final Color PRIMARY_COLOR = new Color(30, 40, 60);
-    private static final Color ACCENT_COLOR  = new Color(0, 150, 255);
-    private static final Color TEXT_LIGHT    = Color.WHITE;
-    private static final Font TITLE_FONT     = new Font("SansSerif", Font.BOLD, 28);
-    private static final Font SUBTITLE_FONT  = new Font("SansSerif", Font.BOLD, 20);
-    private static final Font BODY_FONT      = new Font("SansSerif", Font.PLAIN, 15);
+    private static final Font TITLE_FONT     = ThemeManager.FONT_TITLE;
+    private static final Font SUBTITLE_FONT  = ThemeManager.FONT_SUBTITLE;
+    private static final Font BODY_FONT      = ThemeManager.FONT_BODY;
    
     protected JButton home;
     protected JButton service;
@@ -35,11 +38,11 @@ public class Connect extends JPanel
 
     public Connect(Main mainPage)
     {
-        this.login    = new JTextField("login/email");
-        this.password = new JPasswordField();
-        this.remember = new JCheckBox("Remember me");
-        this.forgot   = new JButton("Forgot password ?");
-        this.connect  = createStyledButton("Login", new Color(46, 139, 87));
+        this.login    = createCyberTextField();
+        this.password = createCyberPasswordField();
+        this.remember = createCyberCheckBox("Remember me");
+        this.forgot   = createCyberLinkButton("Forgot password?");
+        this.connect  = Main.createCyberButton("Login", ThemeManager.ACCENT_GREEN);
 
         this.mainPage = mainPage;
         this.storage  = new UserStorage();
@@ -49,10 +52,10 @@ public class Connect extends JPanel
         
         this.setFont(BODY_FONT);
 
-        this.home    = createStyledButton("HOME", PRIMARY_COLOR);
-        this.service = createStyledButton("Service", PRIMARY_COLOR);
-        this.contact = createStyledButton("Contact", PRIMARY_COLOR);
-        this.about   = createStyledButton("ABOUT", PRIMARY_COLOR);
+        this.home    = Main.createCyberButton("HOME", ThemeManager.ACCENT_BLUE);
+        this.service = Main.createCyberButton("Service", ThemeManager.ACCENT_BLUE);
+        this.contact = Main.createCyberButton("Contact", ThemeManager.ACCENT_BLUE);
+        this.about   = Main.createCyberButton("ABOUT", ThemeManager.ACCENT_BLUE);
 
         this.contact.addActionListener(event ->
         {
@@ -75,39 +78,78 @@ public class Connect extends JPanel
         this.connect.addActionListener(event ->
         {
             String email    = Connect.this.login.getText().trim();
-            String password = new String(Connect.this.password.getPassword());
+            String pass     = new String(Connect.this.password.getPassword());
             
-            if(email.isEmpty() || password.isEmpty() || email.equals("login/email"))
+            if(email.isEmpty() || pass.isEmpty())
             {
-                JOptionPane.showMessageDialog(Connect.this,"Please complete the form before continue!","Warning",JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(Connect.this,
+                    "<html><div style='color:#ff5555;'>Please complete the form before continuing!</div></html>",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            if(!Util.mailVeri(email))
+            SwingWorker <String, Void> worker = new SwingWorker<>() 
             {
-                JOptionPane.showMessageDialog(Connect.this,"Please enter a valid email address!","Warning",JOptionPane.WARNING_MESSAGE);
-                Connect.this.login.setText("");
-                return;
-            }
+                @Override
+                protected String doInBackground() throws Exception 
+                {
+                    dbmanagement.connect();
+                    if(dbmanagement.verifyUser(HASHCode.hash(email), HASHCode.hash(pass))) 
+                    {
+                        User user = dbmanagement.getUserByEmail(HASHCode.hash(email));
+                        if(user != null) 
+                        {
+                            UserSession session = UserSession.getInstance();
+                            session.createUserSession(user, false);
+                            return "success";
+                        } else {
+                            return "user_not_found";
+                        }
+                    } 
+                    else 
+                        return "auth_failed";
+                }
 
-            dbmanagement.connect();
-            if(dbmanagement.verifyUser(email, password)) 
-            {
-                JOptionPane.showMessageDialog(Connect.this,"Connexion successfull !","Success",JOptionPane.INFORMATION_MESSAGE);
-                Connect.this.mainPage.navigateToHome(false);
-            } 
-            else 
-                JOptionPane.showMessageDialog(Connect.this,"Incorrect information!","Connexion error",JOptionPane.ERROR_MESSAGE);
-        
+                @Override
+                protected void done() 
+                {
+                    try 
+                    {
+                        String result = get();
+                        
+                        if("success".equals(result)) 
+                        {
+                            JOptionPane.showMessageDialog(Connect.this,
+                                "<html><div style='color:#00ff00;'>Login successful!</div></html>",
+                                "Success", JOptionPane.INFORMATION_MESSAGE);
+                            Connect.this.mainPage.getContentPane().removeAll();
+                            Connect.this.mainPage.navigateToHome(false);
+                            Connect.this.mainPage.revalidate();
+                            Connect.this.mainPage.repaint();
+                        } 
+                        else if("user_not_found".equals(result)) 
+                            JOptionPane.showMessageDialog(Connect.this,
+                                "<html><div style='color:#ff5555;'>User not found in database</div></html>",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                        else 
+                            JOptionPane.showMessageDialog(Connect.this,
+                                "<html><div style='color:#ff5555;'>Incorrect email or password!</div></html>",
+                                "Login error", JOptionPane.ERROR_MESSAGE);
+                        
+                    } 
+                    catch(Exception e) 
+                    {
+                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(Connect.this,
+                            "<html><div style='color:#ff5555;'>Error during authentication: " + e.getMessage() + "</div></html>",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            };
+            worker.execute();
         });
         
-        this.home.addActionListener(event ->
-        {
-            Connect.this.mainPage.showHome();
-            Connect.this.mainPage.revalidate();
-            Connect.this.mainPage.repaint();
-            
-        });
+        this.home.addActionListener(event -> Connect.this.mainPage.navigateToHome(false));
 
         this.about.addActionListener(event ->
         {
@@ -141,27 +183,71 @@ public class Connect extends JPanel
         this.setOpaque(true); 
     }
 
-    private JButton createStyledButton(String text, Color background)
+    private JTextField createCyberTextField() 
+    {
+        JTextField field = new JTextField();
+        field.setFont(ThemeManager.FONT_MONO);
+        field.setForeground(ThemeManager.TEXT_PRIMARY);
+        field.setBackground(ThemeManager.DARK_BG_TERTIARY);
+        field.setCaretColor(ThemeManager.ACCENT_CYAN);
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ThemeManager.ACCENT_CYAN, 1),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        return field;
+    }
+    
+    private JPasswordField createCyberPasswordField() 
+    {
+        JPasswordField field = new JPasswordField();
+        field.setFont(ThemeManager.FONT_MONO);
+        field.setForeground(ThemeManager.TEXT_PRIMARY);
+        field.setBackground(ThemeManager.DARK_BG_TERTIARY);
+        field.setCaretColor(ThemeManager.ACCENT_CYAN);
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ThemeManager.ACCENT_CYAN, 1),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        return field;
+    }
+    
+    private JCheckBox createCyberCheckBox(String text) 
+    {
+        JCheckBox checkBox = new JCheckBox(text);
+        checkBox.setFont(ThemeManager.FONT_BODY);
+        checkBox.setForeground(ThemeManager.TEXT_PRIMARY);
+        checkBox.setBackground(new Color(0, 0, 0, 0));
+        checkBox.setFocusPainted(false);
+        return checkBox;
+    }
+    
+    private JButton createCyberLinkButton(String text) 
     {
         JButton button = new JButton(text);
-        button.setBackground(background);
-        button.setForeground(TEXT_LIGHT);
+        button.setFont(ThemeManager.FONT_BODY);
+        button.setForeground(ThemeManager.ACCENT_CYAN);
+        button.setBackground(new Color(0, 0, 0, 0));
+        button.setBorder(BorderFactory.createEmptyBorder());
         button.setFocusPainted(false);
-        button.setFont(new Font("SansSerif", Font.BOLD, 14));
-        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+        
         button.addMouseListener(new MouseAdapter() 
         {
-            public void mouseEntered(MouseEvent event) 
+            @Override
+            public void mouseEntered(MouseEvent e) 
             {
-                button.setBackground(background.darker());
+                button.setForeground(ThemeManager.ACCENT_BLUE);
+                button.setText("<html><u>" + text + "</u></html>");
             }
-            public void mouseExited(MouseEvent event) 
+            
+            @Override
+            public void mouseExited(MouseEvent e) 
             {
-                button.setBackground(background);
+                button.setForeground(ThemeManager.ACCENT_CYAN);
+                button.setText(text);
             }
         });
+        
         return button;
     }
 
@@ -180,28 +266,42 @@ public class Connect extends JPanel
             @Override
             public void focusGained(FocusEvent event)
             {
-                Connect.this.login.setText("");
+                if(Connect.this.login.getText().equals("johdoh@gmail.com")) 
+                {
+                    Connect.this.login.setText("");
+                    Connect.this.login.setForeground(ThemeManager.TEXT_PRIMARY);
+                }
             }
 
             @Override
             public void focusLost(FocusEvent event)
             {
-                if(Connect.this.login.getText().isEmpty())
-                    Connect.this.login.setText("login/email");
+                if(Connect.this.login.getText().isEmpty()) 
+                {
+                    Connect.this.login.setText("johdoh@gmail.com");
+                    Connect.this.login.setForeground(ThemeManager.TEXT_MUTED);
+                }
             }
         });
 
         this.password.setFont(BODY_FONT);
         
-        data_panel.add(new JLabel("Login/email"));
+        JLabel emailLabel = new JLabel("Email Address:");
+        emailLabel.setFont(ThemeManager.FONT_MONO_BOLD);
+        emailLabel.setForeground(ThemeManager.TEXT_PRIMARY);
+        data_panel.add(emailLabel);
         data_panel.add(this.login);
-        data_panel.add(new JLabel("Password"));
+        
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(ThemeManager.FONT_MONO_BOLD);
+        passLabel.setForeground(ThemeManager.TEXT_PRIMARY);
+        data_panel.add(passLabel);
         data_panel.add(this.password);
 
-        JLabel title = new JLabel("Connexion form");
+        JLabel title = new JLabel("Login Form");
         title.setFont(SUBTITLE_FONT);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setForeground(ACCENT_COLOR.darker());
+        title.setForeground(ThemeManager.ACCENT_CYAN);
         title.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setVerticalAlignment(SwingConstants.CENTER); 
@@ -209,29 +309,17 @@ public class Connect extends JPanel
         JPanel remember_forgot = new JPanel(new BorderLayout());
         remember_forgot.setOpaque(false);
         remember_forgot.setBorder(BorderFactory.createEmptyBorder(5, 0, 15, 0));
-        
-        this.remember.setContentAreaFilled(false);
-        this.remember.setBorderPainted(false);
-        this.remember.setFont(BODY_FONT);
 
-        this.forgot.setForeground(ACCENT_COLOR);
-        this.forgot.setContentAreaFilled(false);
-        this.forgot.setBorderPainted(false);
-        this.forgot.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        this.forgot.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        remember_forgot.add(this.remember,BorderLayout.WEST);
-        remember_forgot.add(this.forgot,BorderLayout.EAST);
-
-        Border main_border = BorderFactory.createLineBorder(PRIMARY_COLOR, 2);
+        remember_forgot.add(this.remember, BorderLayout.WEST);
+        remember_forgot.add(this.forgot, BorderLayout.EAST);
 
         JPanel main_panel = new JPanel();
-        main_panel.setLayout(new BoxLayout(main_panel,BoxLayout.Y_AXIS));
+        main_panel.setLayout(new BoxLayout(main_panel, BoxLayout.Y_AXIS));
         main_panel.setOpaque(true);
-        main_panel.setBackground(new Color(255, 255, 255, 230));
+        main_panel.setBackground(new Color(20, 30, 50, 230));
         main_panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(30, 30, 30, 30),
-            BorderFactory.createLineBorder(PRIMARY_COLOR, 3)
+            BorderFactory.createLineBorder(ThemeManager.ACCENT_CYAN, 3)
         ));
 
         main_panel.add(title);
